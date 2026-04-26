@@ -1,0 +1,261 @@
+#cloud-config
+# cf-base baseline — Ubuntu 24.04 LTS. See cloud-init/RATIONALE.md.
+
+manage_etc_hosts: true
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - ca-certificates
+  - gnupg
+  - openssh-server
+  - mosh
+  - tailscale
+  - ufw
+  - unattended-upgrades
+  - apt-listchanges
+  - fail2ban
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-compose-plugin
+  - git
+  - nano
+  - tmux
+  - screen
+  - jq
+  - sqlite3
+  - htop
+  - curl
+  - wget
+  - rsync
+  - tree
+  - unzip
+  - ripgrep
+  - fd-find
+  - lsof
+  - strace
+  - tcpdump
+  - dnsutils
+  - ncdu
+  - dmidecode
+  - nodejs
+
+users:
+  - name: deploy
+    uid: 1000
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups:
+      - sudo
+      - docker
+      - systemd-journal
+    ssh_authorized_keys:
+__INCLUDE_OPERATOR_PUBKEYS__
+
+apt:
+  sources:
+    tailscale:
+      source: "deb https://pkgs.tailscale.com/stable/ubuntu noble main"
+      key: |
+        -----BEGIN PGP PUBLIC KEY BLOCK-----
+
+        mQINBF5UmbgBEADAA5mxC8EoWEf53RVdlhQJbNnQW7fctUA5yNcGUbGGGTk6XFqO
+        nlek0Us0FAl5KVBgcS0Bj+VSwKVI/wx91tnAWI36CHeMyPTawdT4FTcS2jZMHbcN
+        UMqM1mcGs3wEQmKz795lfy2cQdVktc886aAF8hy1GmZDSs2zcGMvq5KCNPuX3DD5
+        INPumZqRTjwSwlGptUZrJpKWH4KvuGr5PSy/NzC8uSCuhLbFJc1Q6dQGKlQxwh+q
+        AF4uQ1+bdy92GHiFsCMi7q43hiBg5J9r55M/skboXkNBlS6kFviP+PADHNZe5Vw0
+        0ERtD/HzYb3cH5YneZuYXvnJq2/XjaN6OwkQXuqQpusB5fhIyLXE5ZqNlwBzX71S
+        779tIyjShpPXf1HEVxNO8TdVncx/7Zx/FSdwUJm4PMYQmnwBIyKlYWlV2AGgfxFk
+        mt2VexyS5s4YA1POuyiwW0iH1Ppp9X14KtOfNimBa0yEzgW3CHTEg55MNZup6k2Q
+        mRGtRjeqM5cjrq/Ix15hISmgbZogPRkhz/tcalK38WWAR4h3N8eIoPasLr9i9OVe
+        8aqsyXefCrziaiJczA0kCqhoryUUtceMgvaHl+lIPwyW0XWwj+0q45qzjLvKet+V
+        Q8oKLT1nMr/whgeSJi99f/jE4sWIbHZ0wwR02ZCikKnS05arl3v+hiBKPQARAQAB
+        tERUYWlsc2NhbGUgSW5jLiAoUGFja2FnZSByZXBvc2l0b3J5IHNpZ25pbmcga2V5
+        KSA8aW5mb0B0YWlsc2NhbGUuY29tPokCTgQTAQgAOBYhBCWWqZ6qszghiTwKeUWM
+        qDKVf1hoBQJeVJm4AhsDBQsJCAcCBhUKCQgLAgQWAgMBAh4BAheAAAoJEEWMqDKV
+        f1hoWHEP/1DYd9WZrodyV5zy1izvj0FXtUReJi374gDn3cHrG6uYtXcE9HWZhxQD
+        6nDgYuey5sBhLvPQiE/sl5GYXNw/O95XVk8HS54BHCCYq1GeYkZaiCGLGFBA08JK
+        7PZItGsfdJHwHfhSMtGPS7Cpmylje9gh8ic56NAhC7c5tGTlD69Y8zGHjnRQC6Hg
+        wF34jdp8JTQpSctpmiOxOXN+eH8N59zb0k30CUym1Am438AR0PI6RBTnubBH+Xsc
+        eQhLJnmJ1bM6GP4agXw5T1G/qp95gjIddHXzOkEvrpVfJFCtp91VIlBwycspKYVp
+        1IKAdPM6CVf/YoDkawwm4y4OcmvNarA5dhWBG0Xqse4v1dlYbiHIFcDzXuMyrHYs
+        D2Wg8Hx8TD64uBHY0fp24nweCLnaZCckVUsnYjb0A494lgwveswbZeZ6JC5SbDKH
+        Tc2SE4jq+fsEEJsqsdHIC04d+pMXI95HinJHU1SLBTeKLvEF8Zuk7RTJyaUTjs7h
+        Ne+xWDmRjjR/D/GXBxNrM9mEq6Jvp/ilYTdWwAyrSmTdotHb+NWjAGpJWj5AZCH9
+        HeBr2mtVhvTu3KtCQmGpRiR18zMbmemRXUh+IX5hpWGzynhtnSt7vXOvhJdqqc1D
+        VennRMQZMb09wJjPcvLIApUMl69r29XmyB59NM3UggK/UCJrpYfmuQINBF5UmbgB
+        EADTSKKyeF3XWDxm3x67MOv1Zm3ocoe5xGDRApPkgqEMA+7/mjVlahNXqA8btmwM
+        z1BH5+trjOUoohFqhr9FPPLuKaS/pE7BBP38KzeA4KcTiEq5FQ4JzZAIRGyhsAr+
+        6bxcKV/tZirqOBQFC7bH2UAHH7uIKHDUbBIDFHjnmdIzJ5MBPMgqvSPZvcKWm40g
+        W+LWMGoSMH1Uxd+BvW74509eezL8p3ts42txVNvWMSKDkpiCRMBhfcf5c+YFXWbu
+        r5qus2mnVw0hIyYTUdRZIkOcYBalBjewVmGuSIISnUv76vHz133i0zh4JcXHUDqc
+        yLBUgVWckqci32ahy3jc4MdilPeAnjJQcpJVBtMUNTZ4KM7UxLmOa5hYwvooliFJ
+        wUFPB+1ZwN8d+Ly12gRKf8qA/iL8M5H4nQrML2dRJ8NKzP2U73Fw+n6S1ngrDX8k
+        TPhQBq4EDjDyX7SW3Liemj5BCuWJAo53/2cL9P9I5Nu3i2pLJOHzjBSXxWaMMmti
+        kopArlSMWMdsGgb0xYX+aSV7xW+tefYZJY1AFJ1x2ZgfIc+4zyuXnHYA2jVYLAfF
+        pApqwwn8JaTJWNhny/OtAss7XV/WuTEOMWXaTO9nyNmHla9KjxlBkDJG9sCcgYMg
+        aCAnoLRUABCWatxPly9ZlVbIPPzBAr8VN/TEUbceAH0nIwARAQABiQI2BBgBCAAg
+        FiEEJZapnqqzOCGJPAp5RYyoMpV/WGgFAl5UmbgCGwwACgkQRYyoMpV/WGji9w/8
+        Di9yLnnudvRnGLXGDDF2DbQUiwlNeJtHPHH4B9kKRKJDH1Rt5426Lw8vAumDpBlR
+        EeuT6/YQU+LSapWoDzNcmDLzoFP7RSQaB9aL/nJXv+VjlsVH/crpSTTgGDs8qGsL
+        O3Y2U1Gjo5uMBoOfXwS8o1VWO/5eUwS0KH7hpbOuZcf9U9l1VD2YpGfnMwX1rnre
+        INJqseQAUL3oyNl76gRzyuyQ4AIA06r40hZDgybH0ADN1JtfVk8z4ofo/GcfoXqm
+        hifWJa2SwwHeijhdN1T/kG0FZFHs1DBuBYJG3iJ3/bMeL15j1OjncIYIYccdoEUd
+        uHnp4+ZYj5kND0DFziTvOC4WyPpv3BlBVariPzEnEqnhjx5RYwMabtTXoYJwUkxX
+        2gAjKqh2tXissChdwDGRNASSDrChHLkQewx+SxT5kDaOhB84ZDnp+urn9A+clLkN
+        lZMsMQUObaRW68uybSbZSmIWFVM1GovRMgrPG3T6PAykQhFyE/kMFrv5KpPh7jDj
+        5JwzQkxLkFMcZDdS43VymKEggxqtM6scIRU55i059fLPAVXJG5in1WhMNsmt49lb
+        KqB6je3plIWOLSPuCJ/kR9xdFp7Qk88GCXEd0+4z/vFn4hoOr85NXFtxhS8k9GfJ
+        mM/ZfUq7YmHR+Rswe0zrrCwTDdePjGMo9cHpd39jCvc=
+        =AIVM
+        -----END PGP PUBLIC KEY BLOCK-----
+    docker:
+      source: "deb [arch=amd64] https://download.docker.com/linux/ubuntu noble stable"
+      key: |
+        -----BEGIN PGP PUBLIC KEY BLOCK-----
+
+        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
+        YT90qFF93M3v01BbxP+EIY2/9tiIPbrd
+        =0YYh
+        -----END PGP PUBLIC KEY BLOCK-----
+    nodesource:
+      source: "deb https://deb.nodesource.com/node_lts.x nodistro main"
+      key: |
+        -----BEGIN PGP PUBLIC KEY BLOCK-----
+
+        mQENBFdDN1ABCADaNd/I3j3tn40deQNgz7hB2NvT+syXe6k4ZmdiEcOfBvFrkS8B
+        hNS67t93etHsxEy7E0qwsZH32bKazMqe9zDwoa3aVImryjh6SHC9lMtW27JPHFeM
+        Srkt9YmH1WMwWcRO6eSY9B3PpazquhnvbammLuUojXRIxkDroy6Fw4UKmUNSRr32
+        9Ej87jRoR1B2/57Kfp2Y4+vFGGzSvh3AFQpBHq51qsNHALU6+8PjLfIt+5TPvaWR
+        TB+kAZnQZkaIQM2nr1n3oj6ak2RATY/+kjLizgFWzgEfbCrbsyq68UoY5FPBnu4Z
+        E3iDZpaIqwKr0seUC7iA1xM5eHi5kty1oB7HABEBAAG0Ik5Tb2xpZCA8bnNvbGlk
+        LWdwZ0Bub2Rlc291cmNlLmNvbT6JAU4EEwEKADgCGwMCHgECF4AWIQRvcfUlKChB
+        7tr4UbQvWbX5mxvgtAUCaWfGnwULCQgHAgYVCgkICwIEFgIDAQAKCRAvWbX5mxvg
+        tL0CB/0TTur63uXTPbq+JBQET6jnEVaDrNmpHI/z2RMuj163gmy9CtCwG060c+TI
+        qzmzlPacbTkGc5C50teX2mhs+5JIthfhMibR6Dgy0zeSVuvt9WJ3TNWBpoW5Ezka
+        17SA3Xv9UEJS2eyRd7ALf7TGGAj8DG+xRABXl6bJIXh1s7Hki7kwgVrpNxm/EqyX
+        OrzExm0g2UjgdkbnZrnTyZMB6X8f8fZPo0QcByPvLee2DtkKeE+SZlFXyvnCzcw0
+        94K45vlWkEdRzmiiWAG7guzZyZYGcCO5EoJ3LUP90qhrmQUfsbtczeoEW17EW1jM
+        RohLo8BqVyYc1CAFlULIDNeS3aipuQENBFdDN1ABCACq02gutmss6jiD2u50vdAR
+        x3JOGd92trWRf7qH9/MTToslhoU/LiXhaE0x5+UkKuRbcruCtytn226brvwD0BdO
+        QGpY81ZAxjTFuKUpIDmrHcrI/N9XLrLKx19kWEttsIPNJOgvx8JoeReOX2hLjcbF
+        fmz8e6D1K7eZ+hjMfOLxD94tfhQwYtKbfwf0JwxQV5ItQRryd+X+TcA3nyvFWiJ8
+        Vz92Tf1iG7Z+XasaaZFf2JDuxoiZaSZY7va395ClCEMykFsRbGwgDyB6Fr+6x/UU
+        sYA4rYV7RumIOUdWngWyWjzVy/cKSWASW4jI5ABWs+AfeRTqmZt6+6B7oIghrB19
+        ABEBAAGJAR8EGAECAAkFAldDN1ACGwwACgkQL1m1+Zsb4LRPzgf9FTfPA0d2N37q
+        su5av3bYZJ+w6pvWF3aK2Zdy9ednhCBfPNmhvBRN6mXWixo0DuKEoQMjVpkX0hrq
+        B9FxEVwCPZ9K/JuJgzMROq7T+7R3rcv+TPMdwk8rjIMeRiw2hFLwbrJ0w/v7/3wT
+        MESv3GfXbuT0huEedK7bLfqGMgtmqMeCNkoI7Rf3GO2xArGQ6Zc2rTd4L9+D5HHS
+        IPEixwFZS+Debc7pg3os0bKXEsqMtitvocClOAuPnXpCy04PK450UTr6ZVdirWhJ
+        Oq8SrSERQwqEJ4PMHybiDKwzSr6mcBURre3G71uTAp7h/DISLTpfVMadcB6eoLWr
+        /4fBqejAWg==
+        =wh5k
+        -----END PGP PUBLIC KEY BLOCK-----
+
+write_files:
+  - path: /opt/cf-base/firstboot.sh
+    owner: root:root
+    permissions: "0755"
+    content: |
+__INCLUDE_FIRSTBOOT_SH__
+  - path: /opt/cf-base/post-install.sh
+    owner: root:root
+    permissions: "0755"
+    content: |
+__INCLUDE_POST_INSTALL_SH__
+  - path: /etc/ssh/sshd_config.d/99-hardening.conf
+    owner: root:root
+    permissions: "0644"
+    content: |
+      PermitRootLogin no
+      PasswordAuthentication no
+      PubkeyAuthentication yes
+      ChallengeResponseAuthentication no
+      KbdInteractiveAuthentication no
+      AllowUsers deploy
+      MaxAuthTries 3
+      LoginGraceTime 30
+      ClientAliveInterval 300
+      ClientAliveCountMax 2
+      X11Forwarding no
+      PubkeyAcceptedAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
+      HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,rsa-sha2-512,rsa-sha2-256
+
+  - path: /etc/systemd/journald.conf.d/storage.conf
+    owner: root:root
+    permissions: "0644"
+    content: |
+      [Journal]
+      Storage=persistent
+
+  - path: /etc/apt/apt.conf.d/52unattended-upgrades-local
+    owner: root:root
+    permissions: "0644"
+    content: |
+      Unattended-Upgrade::Allowed-Origins {
+          "${distro_id}:${distro_codename}-security";
+      };
+      Unattended-Upgrade::Automatic-Reboot "true";
+      Unattended-Upgrade::Automatic-Reboot-Time "11:00";
+      Unattended-Upgrade::MinimalSteps "true";
+
+runcmd:
+  - /opt/cf-base/firstboot.sh

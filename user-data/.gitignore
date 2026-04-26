@@ -1,0 +1,4 @@
+# Ignore all per-host overlays — they contain live Tailscale auth keys
+# and other per-host secrets. Track the template only.
+*.yaml
+!template.yaml

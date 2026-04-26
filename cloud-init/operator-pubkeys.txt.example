@@ -1,0 +1,20 @@
+# Copy this file to cloud-init/operator-pubkeys.txt and replace the line
+# below with your own SSH public key(s) — one per line, no leading dash,
+# no quotes. cloud-init/build.sh splices each line as a separate
+# authorized_keys entry on the deploy user.
+#
+# Comment lines (starting with #) and blank lines are skipped.
+#
+# Find your public key with:
+#     cat ~/.ssh/id_ed25519.pub
+#     cat ~/.ssh/id_rsa.pub
+#
+# Multiple keys are supported (e.g., laptop + desktop + phone):
+#     ssh-ed25519 AAAAC3Nz…laptop user@laptop
+#     ssh-ed25519 AAAAC3Nz…desktop user@desktop
+#
+# operator-pubkeys.txt is gitignored so your real key never enters git
+# history. After editing, run ./cloud-init/build.sh to regenerate
+# base.yaml.
+
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEX you@your-machine

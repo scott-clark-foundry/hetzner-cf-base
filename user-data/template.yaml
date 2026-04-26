@@ -1,0 +1,48 @@
+#cloud-config
+# ================================================================
+# cf-base per-host user-data overlay template
+# ================================================================
+# Copy this file to user-data/<hostname>.yaml and fill in the
+# placeholders below:
+#   - <hostname> — the short hostname for this host
+#   - <ONE_TIME_TAILSCALE_AUTH_KEY> — the Tailscale auth key
+#     (placeholder string is a fail-fast marker, not a key-type
+#     description — firstboot.sh will error if this literal string
+#     is left in place)
+#
+# Then merge with cloud-init/base.yaml using the merge helper:
+#   python3 cloud-init/merge.py user-data/<hostname>.yaml > /tmp/<hostname>.yaml
+#
+# (Do NOT cat the two files together — two #cloud-config shebangs in one
+# file are read as a single YAML document, and the overlay's write_files
+# clobbers the base's. merge.py handles the combine correctly.)
+#
+# Then supply the merged file to hcloud server create:
+#   hcloud server create --user-data-from-file /tmp/<hostname>.yaml
+#
+# Required Tailscale auth key properties (generate from admin console):
+#   - reusable=true      (same key may provision multiple cf-base hosts)
+#   - tag=tag:server     (stable server identity; key-expiry disabled by
+#                         Tailscale's default policy for tagged devices)
+#   - pre-authorized=true (skips manual device approval for unattended boot)
+#   - ephemeral=false    (host is persistent; ephemeral=true auto-removes
+#                         the node after first offline period — wrong here)
+# Store the generated key in your password manager; long expiry (~90 days) is fine.
+#
+# Pre-flight: ensure Tailscale ACL declares
+#   tagOwners: { 'tag:server': ['<your-email>'] }
+# before generating the key — see runbook pre-flight subsections.
+#
+# See docs/runbook-provision.md for the full operator flow.
+# ================================================================
+
+hostname: <hostname>
+fqdn: <hostname>
+preserve_hostname: false
+
+write_files:
+  - path: /opt/cf-base/tailscale-authkey
+    permissions: '0600'
+    owner: root:root
+    content: |
+      <ONE_TIME_TAILSCALE_AUTH_KEY>

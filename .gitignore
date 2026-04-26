@@ -1,0 +1,42 @@
+# macOS
+.DS_Store
+._*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Secrets
+.env
+*.secret
+*.key
+
+# Claude Code local state
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
+# Ephemeral T*-proof-checklist working docs (session state, not artifacts)
+T*-proof-checklist.md
+
+# Iterative cloud-init buildup (ephemeral, not project artifacts)
+sandbox/
+
+# Session pointer file (local-only, regenerated per session)
+notes.md
+
+# Generated cloud-init artifact (build with ./cloud-init/build.sh)
+cloud-init/base.yaml
+
+# Operator's actual SSH public keys (must never enter git history;
+# see cloud-init/operator-pubkeys.txt.example for format)
+cloud-init/operator-pubkeys.txt
+
+# Python bytecode cache from running cloud-init/merge.py
+__pycache__/
+*.pyc
+
+# Security review reports — useful local references but project-internal;
+# don't ship them as part of the public repo.
+docs/security-review-*.md
